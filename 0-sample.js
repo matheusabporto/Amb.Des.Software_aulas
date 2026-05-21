@@ -113,28 +113,59 @@ function criarPedido(order,subtotal,discount,deliveryFee,serviceFee,total){
 }
 
 
-  console.log(`Notificação enviada ao restaurante ${order.restaurantId}`); // envia para o restarante
-  console.log('Restaurante recebeu novo pedido');
+  function registraPedido(orderRecord){
+    console.log('Pedido registrado no banco de dados:', orderRecord.id);
+  }
 
-  console.log(`Email de confirmação enviado para ${order.customerEmail}`); //cliente recebe a confirmação
-  console.log(`SMS enviado para ${order.customerPhone}`);
+  function enviarNotificacaoRestaurante(order){
+    console.log(`Notificação enviada ao restaurante ${order.restaurantId}`); // envia para o restarante
+    console.log('Restaurante recebeu novo pedido');
+  }
 
-  console.log(`Pedido adicionado à fila de entrega`);
-  console.log(`Entregador será atribuído em breve`);
+  function enviarNotificacaoCliente(order){
+    console.log(`Email de confirmação enviado para ${order.customerEmail}`); //cliente recebe a confirmação
+    console.log(`SMS enviado para ${order.customerPhone}`);
+  }
 
+  function adicionarFilaEntrega(){
+    console.log(`Pedido adicionado à fila de entrega`);
+    console.log(`Entregador será atribuído em breve`);
+  }
+
+  function atualizarHistorico(order){
   console.log(`Histórico de compras do cliente ${order.customerId} atualizado`); // atualiza historico e compras do cliente
+  }
 
-  console.log(`Dados do pedido enviados para sistema de recomendações`);
+  function enviarDadosRecomendacoes(order){
+    console.log(`Dados do pedido enviados para sistema de recomendações`);
+  }
+ 
+  function processarPedido(orderRecord){
+    console.log(`Pedido ${orderRecord.id} processado com sucesso`);
+  }
 
-  console.log(`Pedido ${orderRecord.id} processado com sucesso`);
-  console.log(`Total: R$ ${total.toFixed(2)}`);
+  function totalPedido(total){
+    console.log(`Total: R$ ${total.toFixed(2)}`);
+  }
+
+  
+
+
 
 
 function processiFoodOrder(order) {
 
   const restauranteValido = validarRestaurante(order);
+  if(!restauranteValido){
+    return null;
+  }
+
 
   const clienteValido = validarCliente(order);
+  if(!clienteValido){
+    return null;
+  }
+
 
   const carrinhoValido = validarCarrinho(order);
   if(!carrinhoValido) {
@@ -156,43 +187,31 @@ function processiFoodOrder(order) {
 
   const total = calcularTotal(subtotal,discount,deliveryFee,serviceFee);
 
+  const orderRecord = criarPedido(order, subtotal, discount, deliveryFee, serviceFee, total);
+  
   atualizarEstoque(order); // não precisa de const! pois não esta retornando nada. apenas atualizando o estoque
  
+  registraPedido(orderRecord);
 
-  const orderRecord = { //cria um recibo do pedido/abre instancia de um pedido - envia para o restarante  cliente recebe a confirmação
-    id: `IFOOD-${Date.now()}`,
-    restaurantId: order.restaurantId,
-    customerId: order.customerId,
-    items: order.items,
-    subtotal,
-    discount,
-    deliveryFee,
-    serviceFee,
-    total,
-    status: 'confirmed',
-    createdAt: new Date()
-  };
+  enviarNotificacaoRestaurante(order);
 
-  console.log('Pedido registrado no banco de dados:', orderRecord.id);
+  enviarNotificacaoCliente(order);
 
-  console.log(`Notificação enviada ao restaurante ${order.restaurantId}`); // envia para o restarante
-  console.log('Restaurante recebeu novo pedido');
+  adicionarFilaEntrega();
 
-  console.log(`Email de confirmação enviado para ${order.customerEmail}`); //cliente recebe a confirmação
-  console.log(`SMS enviado para ${order.customerPhone}`);
+  atualizarHistorico(order);
 
-  console.log(`Pedido adicionado à fila de entrega`);
-  console.log(`Entregador será atribuído em breve`);
+  enviarDadosRecomendacoes(order);
+ 
+  processarPedido(orderRecord);
 
-  console.log(`Histórico de compras do cliente ${order.customerId} atualizado`); // atualiza historico e compras do cliente
+  totalPedido(total);
 
-  console.log(`Dados do pedido enviados para sistema de recomendações`);
 
-  console.log(`Pedido ${orderRecord.id} processado com sucesso`);
-  console.log(`Total: R$ ${total.toFixed(2)}`);
+  
 
-  return orderRecord;
-}
+
+
 
 const iFoodOrder = { // ordem do pedido contendo os dados
   restaurantId: 'rest-123',
@@ -211,9 +230,13 @@ const iFoodOrder = { // ordem do pedido contendo os dados
     city: 'São Paulo',
     distance: 4
   }
-};
+}
+
+}
 
 console.log('=== PROCESSANDO PEDIDO DO IFOOD ===\n');
 const result = processiFoodOrder(iFoodOrder);
 console.log('\n=== RESULTADO ===');
 console.log(result);
+
+
